@@ -28,15 +28,15 @@ Install one of the following:
 ## Quick Start
 
 ```shell
-# 1. Clone this repository
-git clone https://github.com/dsg-robotics/dart-services-compose.git
+# 1. Clone
+git clone https://github.com/DoosanRobotics/dart-services-compose.git
 cd dart-services-compose
 
 # 2. Configure environment
 cp .env.example .env
 
-# 3. Start simulator
-docker compose up -d
+# 3. Start simulator + build modules
+docker compose --profile build up -d
 ```
 
 ## Configuration
@@ -59,15 +59,14 @@ Edit `.env` to customize:
 ## Usage
 
 ```shell
-# Option 1: Start simulator only
-docker compose up -d
+# Start simulator + build modules
+docker compose --profile build up -d
 
-# Option 2: Start simulator + build modules
-# Remove '#' to enable
-#docker compose --profile build up -d
+# Start simulator only:
+#docker compose up -d
 
 # Stop
-docker compose down
+docker compose --profile build down
 ```
 
 Simulator data is automatically created under the directory where you run `docker compose up`:
@@ -81,40 +80,17 @@ data/
 ## Update
 
 ```shell
-docker compose pull
-docker compose up -d
-```
-
-## Services
-
-### Simulator (default)
-
-| Port | Protocol | Description |
-|---|---|---|
-| 12345 | TCP | DRCF |
-| 3601 | TCP | DRAS |
-| 502 | TCP | Modbus |
-| 12360 | UDP | — |
-
-### Build Modules (optional)
-
-Start with the `build` profile:
-
-```shell
+docker compose --profile build pull
 docker compose --profile build up -d
 ```
 
-| Service | Port | Description |
-|---|---|---|
-| build-module-fw | 5022 | Firmware builder (SSH) |
-| build-module-ui | 3002 | UI build service |
-| build-module-ui | 5023 | UI builder (SSH) |
-
 ## Images
 
-- [`ghcr.io/dsg-robotics/simulator`](https://github.com/orgs/dsg-robotics/packages/container/package/simulator)
-- [`ghcr.io/dsg-robotics/build-module-fw`](https://github.com/orgs/dsg-robotics/packages/container/package/build-module-fw)
-- [`ghcr.io/dsg-robotics/build-module-ui`](https://github.com/orgs/dsg-robotics/packages/container/package/build-module-ui)
+Images are hosted on GitHub Container Registry (GHCR) and pulled automatically on `docker compose up`.
+
+- [`ghcr.io/doosanrobotics/simulator`](https://github.com/orgs/DoosanRobotics/packages/container/package/simulator)
+- [`ghcr.io/doosanrobotics/build-module-fw`](https://github.com/orgs/DoosanRobotics/packages/container/package/build-module-fw)
+- [`ghcr.io/doosanrobotics/build-module-ui`](https://github.com/orgs/DoosanRobotics/packages/container/package/build-module-ui)
 
 ## License
 

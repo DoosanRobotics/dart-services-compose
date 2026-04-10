@@ -1,6 +1,6 @@
 services:
   simulator:
-    image: ghcr.io/dsg-robotics/simulator:${SDK_VERSION:-sdk5}
+    image: ghcr.io/doosanrobotics/simulator:${SDK_VERSION:-sdk5}
     container_name: simulator
     privileged: true
     stdin_open: true
@@ -23,7 +23,7 @@ services:
 
   build_fw:
     profiles: ["build"]
-    image: ghcr.io/dsg-robotics/build-module-fw:latest
+    image: ghcr.io/doosanrobotics/build-module-fw:latest
     container_name: build-module-fw
     stdin_open: true
     tty: true
@@ -38,7 +38,7 @@ services:
 
   build_ui:
     profiles: ["build"]
-    image: ghcr.io/dsg-robotics/build-module-ui:latest
+    image: ghcr.io/doosanrobotics/build-module-ui:latest
     container_name: build-module-ui
     stdin_open: true
     tty: true
