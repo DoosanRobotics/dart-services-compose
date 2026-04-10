@@ -1,0 +1,12 @@
+# Environment
+.env
+
+# Simulator data
+data/
+
+# macOS
+.DS_Store
+
+# Internal
+guide_internal/
+compose_internal.zip

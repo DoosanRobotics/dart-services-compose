@@ -1,0 +1,59 @@
+services:
+  simulator:
+    image: ghcr.io/dsg-robotics/simulator:${SDK_VERSION:-sdk5}
+    container_name: simulator
+    privileged: true
+    stdin_open: true
+    tty: true
+    ports:
+      - "12345:12345"
+      - "3601:3601"
+      - "502:502"
+      - "12360:12360/udp"
+    environment:
+      - ROBOT_MODEL=${ROBOT_MODEL:-M1013}
+    volumes:
+      - ./data/${SDK_VERSION:-sdk5}/${ROBOT_MODEL:-M1013}:/home/dra/etc/data
+    cpus: ${SIMULATOR_CPU:-4}
+    mem_limit: ${SIMULATOR_MEMORY:-2g}
+    mem_reservation: 1g
+    mem_swappiness: 10
+    logging:
+      driver: none
+
+  build_fw:
+    profiles: ["build"]
+    image: ghcr.io/dsg-robotics/build-module-fw:latest
+    container_name: build-module-fw
+    stdin_open: true
+    tty: true
+    ports:
+      - "5022:22"
+    cpus: 1.0
+    mem_limit: 1g
+    mem_reservation: 512m
+    mem_swappiness: 0
+    logging:
+      driver: none
+
+  build_ui:
+    profiles: ["build"]
+    image: ghcr.io/dsg-robotics/build-module-ui:latest
+    container_name: build-module-ui
+    stdin_open: true
+    tty: true
+    ports:
+      - "3002:3000"
+      - "8089:8089/udp"
+      - "5023:22"
+    environment:
+      - BUILD_GCC_CONTAINER_IP_ADDR=build-module-fw
+    depends_on:
+      - build_fw
+    cpus: 2.0
+    mem_limit: 2g
+    mem_reservation: 512m
+    mem_swappiness: 0
+    logging:
+      driver: none
+
