@@ -123,12 +123,22 @@ If you encounter Docker connectivity errors or if the Rancher Desktop Diagnostic
    After running this, check the Rancher Desktop Diagnostics tab again or restart Rancher Desktop.
 
 4. **Resolve `wsl.exe exited with code 1` (kubeconfig / WSL Error)**
-   If Rancher Desktop Diagnostics reports an error like `Error managing distribution Ubuntu-24.04:kubeconfig: C:\windows\system32\wsl.exe exited with code 1`, your WSL core might be outdated or stuck. Fix this by updating and forcefuly restarting WSL:
+   If Rancher Desktop Diagnostics reports an error like `Error managing distribution Ubuntu: kubeconfig: C:\Windows\system32\wsl.exe exited with code 1`, this may be caused by a conflicting `~/.kube/config` file or an outdated WSL core.
+
+   **Fix A: Conflicting `kubeconfig` file (invalid argument)**
+   Rancher Desktop attempts to create a symlink at `~/.kube/config` in your WSL distribution (e.g., `Ubuntu`) to point to its own cluster configuration. If a regular file or directory already exists at this path, the boot process will fail. Fix this by backing up or removing the file:
+   ```shell
+   wsl -d Ubuntu -- mv ~/.kube/config ~/.kube/config.bak
+   ```
+   *(Note: Replace `Ubuntu` with your default WSL distribution name if it differs.)*
+
+   **Fix B: Outdated or stuck WSL core**
+   If the issue persists, your WSL core might be outdated or stuck. Fix this by updating and forcefully restarting WSL:
    ```shell
    wsl --update
    wsl --shutdown
    ```
-   After updating, completely quit and relaunch Rancher Desktop.
+   After applying either fix, completely quit and relaunch Rancher Desktop.
 
 ### Container Fails to Start Due to Windows Port Conflicts
 
