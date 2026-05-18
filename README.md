@@ -111,13 +111,13 @@ If you encounter Docker connectivity errors or if the Rancher Desktop Diagnostic
 
 2. **Set Default Docker Context**
    Ensure Docker is pointing to the correct engine:
-   ```shell
+   ```powershell
    docker context use default
    ```
 
 3. **Wake Up the Stopped WSL Distribution**
    If your default WSL distribution (e.g., `Ubuntu`) is stopped, Rancher Desktop may fail to inject its background helpers. Manually wake it up by running:
-   ```shell
+   ```powershell
    wsl -d Ubuntu -e true
    ```
    After running this, check the Rancher Desktop Diagnostics tab again or restart Rancher Desktop.
@@ -127,14 +127,14 @@ If you encounter Docker connectivity errors or if the Rancher Desktop Diagnostic
 
    **Fix A: Conflicting `kubeconfig` file (invalid argument)**
    Rancher Desktop attempts to create a symlink at `~/.kube/config` in your WSL distribution (e.g., `Ubuntu`) to point to its own cluster configuration. If a regular file or directory already exists at this path, the boot process will fail. Fix this by backing up or removing the file:
-   ```shell
+   ```powershell
    wsl -d Ubuntu -- mv ~/.kube/config ~/.kube/config.bak
    ```
    *(Note: Replace `Ubuntu` with your default WSL distribution name if it differs.)*
 
    **Fix B: Outdated or stuck WSL core**
    If the issue persists, your WSL core might be outdated or stuck. Fix this by updating and forcefully restarting WSL:
-   ```shell
+   ```powershell
    wsl --update
    wsl --shutdown
    ```
@@ -146,7 +146,7 @@ On Windows, services or previous Docker sessions may occupy required host ports,
 
 | Service | Host Ports |
 |---|---|
-| `simulator` | 1122, 12345, 12360 (UDP), 3601, 502 |
+| `simulator` | 12345, 12360 (UDP), 3601, 502 |
 | `build-module-fw` | 5022 |
 | `build-module-ui` | 5023, 3002, 8089 (UDP) |
 
@@ -154,7 +154,7 @@ On Windows, services or previous Docker sessions may occupy required host ports,
 
 ```powershell
 # Check if any required ports are already occupied
-netstat -ano | Select-String "5023|3002|8089|5022|1122|12345|12360|3601|:502 "
+netstat -ano | Select-String ":5023\b|:3002\b|:8089\b|:5022\b|:12345\b|:12360\b|:3601\b|:502\b"
 ```
 
 Note the PID from the last column and identify the process:
@@ -171,14 +171,14 @@ netsh interface portproxy show all
 
 If you see entries for the above ports pointing to a WSL2 IP (e.g., `172.x.x.x`) but containers are not running, these are stale rules. Remove them:
 
-```shell
+```powershell
 # Remove a specific stale rule (replace <PORT> with the conflicting port number)
 netsh interface portproxy delete v4tov4 listenport=<PORT> listenaddress=0.0.0.0
 ```
 
 **Step 3 — Restart containers:**
 
-```shell
+```powershell
 docker compose --profile build down
 docker compose --profile build up -d
 ```
