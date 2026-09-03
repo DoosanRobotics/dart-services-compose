@@ -45,7 +45,7 @@ Edit `.env` to customize:
 
 | Variable | Default | Description |
 |---|---|---|
-| `SDK_VERSION` | `sdk5` | SDK version (`sdk2` ~ `sdk5`) |
+| `SDK_VERSION` | `sdk7` | SDK version (`sdk2` ~ `sdk7`) |
 | `ROBOT_MODEL` | `M1013` | Robot model (see options below) |
 | `SIMULATOR_CPU` | `4` | CPU cores allocated to simulator |
 | `SIMULATOR_MEMORY` | `2g` | Memory allocated to simulator |
@@ -73,7 +73,7 @@ Simulator data is automatically created under the directory where you run `docke
 
 ```
 data/
-└── sdk5/
+└── sdk7/
     └── M1013/
 ```
 
