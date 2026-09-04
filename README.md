@@ -143,7 +143,7 @@ docker rm -f simulator
 
 #### The first `docker compose up` takes several minutes
 
-The first run downloads roughly 3 GB of images. It is not stuck. Later starts take seconds.
+The first run downloads about 800 MB of images for the default set (they expand to several GB on disk). It is not stuck. Later starts take seconds.
 
 #### `docker compose logs` shows nothing
 
@@ -203,7 +203,7 @@ Repeat this after a Rancher Desktop reinstall or `rdctl factory-reset`. Not requ
 
 #### Apple Silicon: slow first start, and Rosetta must stay off
 
-The images are `linux/amd64` only, so on Apple Silicon they run under QEMU emulation. A noticeably slow first start is expected.
+The `simulator` and `build-module-fw` images are `linux/amd64` only, so on Apple Silicon they run under emulation. A noticeably slow first start is expected.
 
 Do **not** enable Rancher Desktop's Rosetta support (Preferences → Virtual Machine → Emulation). It is not supported here — the simulator fails to start with it enabled.
 
@@ -216,6 +216,8 @@ First check whether WSL itself is healthy:
 ```powershell
 wsl -d Ubuntu -- echo ok
 ```
+
+(Replace `Ubuntu` with any other distribution you have — `wsl --list` shows them. If you have none, skip this check.)
 
 If another distribution answers normally, WSL is fine and only Rancher Desktop's own distributions are broken. Quit Rancher Desktop from the system tray, then run **PowerShell as Administrator**:
 
