@@ -731,3 +731,7 @@ Copyright © Doosan Robotics. All rights reserved.
 
 이 저장소는 개인적·비상업적 용도로만 제공됩니다.
 두산로보틱스의 사전 서면 동의 없이 이 저장소의 어떤 부분도 수정, 재배포하거나 상업적으로 이용할 수 없습니다.
+
+> 이 번역은 편의를 위한 참고용이며, 법적 효력은 영문 원문에 있습니다. 두 문안이 다를 경우 영문이 우선합니다.
+>
+> *This Korean text is a convenience translation. The English version above is the legally binding one and prevails in case of any discrepancy.*
