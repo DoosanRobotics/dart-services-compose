@@ -1,6 +1,6 @@
 services:
   simulator:
-    image: ghcr.io/doosanrobotics/simulator:${SDK_VERSION:-sdk5}
+    image: ghcr.io/doosanrobotics/simulator:${SDK_VERSION:-sdk7}
     container_name: simulator
     privileged: true
     stdin_open: true
@@ -13,7 +13,7 @@ services:
     environment:
       - ROBOT_MODEL=${ROBOT_MODEL:-M1013}
     volumes:
-      - ./data/${SDK_VERSION:-sdk5}/${ROBOT_MODEL:-M1013}:/home/dra/etc/data
+      - ./data/${SDK_VERSION:-sdk7}/${ROBOT_MODEL:-M1013}:/home/dra/etc/data
     cpus: ${SIMULATOR_CPU:-4}
     mem_limit: ${SIMULATOR_MEMORY:-2g}
     mem_reservation: 1g
