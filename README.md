@@ -425,7 +425,7 @@ docker compose --profile build up -d
 
 | 변수 | 기본값 | 설명 |
 |---|---|---|
-| `SDK_VERSION` | `sdk5` | SDK 버전 (`sdk2` ~ `sdk5`) |
+| `SDK_VERSION` | `sdk7` | SDK 버전 (`sdk2` ~ `sdk7`) |
 | `ROBOT_MODEL` | `M1013` | 로봇 모델 (아래 목록 참고) |
 | `SIMULATOR_CPU` | `4` | 시뮬레이터에 할당할 CPU 코어 수 |
 | `SIMULATOR_MEMORY` | `2g` | 시뮬레이터에 할당할 메모리 |
@@ -453,7 +453,7 @@ docker compose --profile build down
 
 ```
 data/
-└── sdk5/
+└── sdk7/
     └── M1013/
 ```
 
