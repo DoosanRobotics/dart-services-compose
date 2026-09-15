@@ -391,11 +391,13 @@ The `docker` group grants root-level privileges on the machine. If you do not wa
 
 #### `Permission denied` when deleting `data/`
 
-If `data/` does not exist yet, the Docker daemon creates it as `root`, so your user cannot delete it (rootful Docker, the default):
+If `data/` does not exist yet, the Docker daemon creates it as `root`, and the simulator also writes its files as `root`, so your user cannot delete them (rootful Docker, the default):
 
 ```shell
-sudo rm -rf data/sdk7/M1013
+sudo rm -rf data
 ```
+
+To reset a single robot model only, delete its folder instead, e.g. `sudo rm -rf data/sdk7/M1013`.
 
 #### `range of CPUs is from 0.01 to N.00, as there are only N CPUs available`
 
@@ -416,7 +418,12 @@ sudo sysctl --system
 
 #### Rootless Docker: `NanoCPUs can not be set`
 
-The `cpus` limit in `docker-compose.yml` needs the `cpu` cgroup controller, which systemd delegates to regular users by default only from version 252 (Ubuntu 22.04 ships 249). Delegate it as described in the [Docker docs](https://docs.docker.com/engine/security/rootless/tips/#limiting-resources), then reboot.
+The `cpus` limit in `docker-compose.yml` needs the `cpu` cgroup controller, which systemd delegates to regular users by default only from version 252 (Ubuntu 22.04 ships 249). Add the delegation as described in the [Docker docs](https://docs.docker.com/engine/security/rootless/tips/#limiting-resources), then reload systemd and restart Docker:
+
+```shell
+sudo systemctl daemon-reload
+systemctl --user restart docker
+```
 
 Rootless mode is otherwise untested with this setup.
 
@@ -830,11 +837,13 @@ sudo usermod -aG docker $USER
 
 #### `data/`를 지울 때 `Permission denied`
 
-`data/`가 아직 없으면 Docker 데몬이 `root` 소유로 만들기 때문에 일반 사용자 권한으로는 지울 수 없습니다 (기본값인 rootful Docker 기준):
+`data/`가 아직 없으면 Docker 데몬이 `root` 소유로 만들고 시뮬레이터도 파일을 `root`로 기록하기 때문에, 일반 사용자 권한으로는 지울 수 없습니다 (기본값인 rootful Docker 기준):
 
 ```shell
-sudo rm -rf data/sdk7/M1013
+sudo rm -rf data
 ```
+
+로봇 모델 하나만 초기화하려면 해당 폴더만 지우세요 (예: `sudo rm -rf data/sdk7/M1013`).
 
 #### `range of CPUs is from 0.01 to N.00, as there are only N CPUs available`
 
@@ -855,7 +864,12 @@ sudo sysctl --system
 
 #### Rootless Docker: `NanoCPUs can not be set`
 
-`docker-compose.yml`의 `cpus` 제한을 적용하려면 `cpu` cgroup 컨트롤러가 필요한데, systemd는 252 버전부터 이 컨트롤러를 일반 사용자에게 기본으로 위임합니다 (Ubuntu 22.04는 249 버전). [Docker 문서](https://docs.docker.com/engine/security/rootless/tips/#limiting-resources)대로 위임한 뒤 재부팅하세요.
+`docker-compose.yml`의 `cpus` 제한을 적용하려면 `cpu` cgroup 컨트롤러가 필요한데, systemd는 252 버전부터 이 컨트롤러를 일반 사용자에게 기본으로 위임합니다 (Ubuntu 22.04는 249 버전). [Docker 문서](https://docs.docker.com/engine/security/rootless/tips/#limiting-resources)대로 위임 설정을 추가한 뒤 systemd를 다시 읽고 Docker를 재시작하세요:
+
+```shell
+sudo systemctl daemon-reload
+systemctl --user restart docker
+```
 
 그 밖의 Rootless 모드 동작은 이 구성에서 검증되지 않았습니다.
 
