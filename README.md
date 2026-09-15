@@ -187,7 +187,7 @@ Compose reads `.env` from the directory the command runs in. Started from anywhe
 
 #### UDP ports never appear on the host
 
-`docker-compose.yml` publishes `12360/udp` (simulator discovery) and `8089/udp` (build-module-ui), but nothing on the host can reach them: Rancher Desktop's default port forwarder (SSH) forwards **TCP only**.
+`docker-compose.yml` publishes `12350/udp` and `12360/udp` (simulator discovery — sdk8 and later / sdk7 and earlier) and `8089/udp` (build-module-ui), but nothing on the host can reach them: Rancher Desktop's default port forwarder (SSH) forwards **TCP only**.
 
 **Fix:** switch to the gRPC forwarder once per installation:
 
@@ -316,7 +316,7 @@ On Windows, services or previous Docker sessions may occupy required host ports,
 
 | Service | Container name | Host Ports |
 |---|---|---|
-| `simulator` | `simulator` | 12345, 3601, 502, 12360 (UDP) |
+| `simulator` | `simulator` | 12345, 3600, 3601, 502, 12350 (UDP), 12360 (UDP) |
 | `build_fw` | `build-module-fw` | 5022 |
 | `build_ui` | `build-module-ui` | 5023, 3002, 8089 (UDP) |
 
@@ -324,7 +324,7 @@ On Windows, services or previous Docker sessions may occupy required host ports,
 
 ```powershell
 # Check if any required ports are already occupied
-netstat -ano | Select-String ":5023\b|:3002\b|:8089\b|:5022\b|:12345\b|:12360\b|:3601\b|:502\b"
+netstat -ano | Select-String ":5023\b|:3002\b|:8089\b|:5022\b|:12345\b|:12350\b|:12360\b|:3600\b|:3601\b|:502\b"
 ```
 
 Note the PID from the last column and identify the process:
@@ -555,7 +555,7 @@ Compose는 명령을 실행한 디렉터리에서 `.env`를 읽습니다. 다른
 
 #### 호스트에서 UDP 포트가 열리지 않습니다
 
-`docker-compose.yml`은 `12360/udp` (시뮬레이터 자동 검색)와 `8089/udp` (build-module-ui)를 노출하지만, 호스트에서는 이 포트에 접근할 수 없습니다. Rancher Desktop의 기본 포트 포워더(SSH)가 **TCP 만** 전달하기 때문입니다.
+`docker-compose.yml`은 `12350/udp`·`12360/udp` (시뮬레이터 자동 검색 — sdk8 이후 / sdk7 이전)와 `8089/udp` (build-module-ui)를 노출하지만, 호스트에서는 이 포트에 접근할 수 없습니다. Rancher Desktop의 기본 포트 포워더(SSH)가 **TCP 만** 전달하기 때문입니다.
 
 **해결:** gRPC 포워더로 전환합니다. 설치 후 한 번만 실행하면 됩니다:
 
@@ -684,7 +684,7 @@ Windows에서는 다른 서비스나 이전 Docker 세션이 필요한 호스트
 
 | 서비스 | 컨테이너 이름 | 호스트 포트 |
 |---|---|---|
-| `simulator` | `simulator` | 12345, 3601, 502, 12360 (UDP) |
+| `simulator` | `simulator` | 12345, 3600, 3601, 502, 12350 (UDP), 12360 (UDP) |
 | `build_fw` | `build-module-fw` | 5022 |
 | `build_ui` | `build-module-ui` | 5023, 3002, 8089 (UDP) |
 
@@ -692,7 +692,7 @@ Windows에서는 다른 서비스나 이전 Docker 세션이 필요한 호스트
 
 ```powershell
 # 필요한 포트가 이미 점유되어 있는지 확인
-netstat -ano | Select-String ":5023\b|:3002\b|:8089\b|:5022\b|:12345\b|:12360\b|:3601\b|:502\b"
+netstat -ano | Select-String ":5023\b|:3002\b|:8089\b|:5022\b|:12345\b|:12350\b|:12360\b|:3600\b|:3601\b|:502\b"
 ```
 
 마지막 열의 PID를 확인한 뒤 해당 프로세스를 조회합니다:

@@ -7,8 +7,10 @@ services:
     tty: true
     ports:
       - "12345:12345"
+      - "3600:3600"
       - "3601:3601"
       - "502:502"
+      - "12350:12350/udp"
       - "12360:12360/udp"
     environment:
       - ROBOT_MODEL=${ROBOT_MODEL:-M1013}
