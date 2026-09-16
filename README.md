@@ -4,13 +4,14 @@
 
 Docker Compose setup for running Dart robot simulator and build services.
 
-This setup works with any environment that supports `docker compose` (e.g. Docker Desktop, Rancher Desktop, OrbStack, Podman Desktop).
+This setup works with any environment that supports `docker compose` (e.g. Docker Desktop, Rancher Desktop, OrbStack, Podman Desktop, or Docker Engine on Linux).
 
 ## Prerequisites
 
 **Git**
 - Windows: `winget install Git.Git` (or download from [git-scm.com](https://git-scm.com/))
 - Mac: `brew install git`
+- Linux (Ubuntu): `sudo apt install git`
 
 > Git is optional. You can also download the repository as a ZIP from GitHub (**Code ▸ Download ZIP**) and skip step 1 of the Quick Start.
 
@@ -36,6 +37,17 @@ This setup works with any environment that supports `docker compose` (e.g. Docke
 
 > **Mac + Rancher Desktop:** The default VM has 2 CPUs / 4 GB, which is less than the `SIMULATOR_CPU=4` default in `.env.example`. Raise it to **4+ CPUs / 6+ GB** in Preferences (⌘,) → Virtual Machine → Hardware before the first start, or the simulator will not start. See [macOS](#macos).
 
+**Docker Engine** (Linux, free)
+
+- Ubuntu: `sudo apt install docker.io docker-compose-v2`
+- Other distributions, or Docker's own packages: [Install Docker Engine](https://docs.docker.com/engine/install/)
+
+> **Linux:** Compose is a separate package (`docker-compose-v2` on Ubuntu, `docker-compose-plugin` from Docker's repository). Without it, `docker compose` fails.
+> To run `docker` without `sudo`, add your user to the `docker` group, then log out and back in. The group grants root-level privileges on the machine.
+> ```shell
+> sudo usermod -aG docker $USER
+> ```
+
 ## Quick Start
 
 ```shell
@@ -47,7 +59,7 @@ cd dart-services-compose
 cp .env.example .env
 
 # 3. Start simulator + build modules
-# Note: Make sure Docker Desktop or Rancher Desktop is running first
+# Note: Make sure Docker Desktop or Rancher Desktop is running first (on Linux: the Docker service)
 docker compose --profile build up -d
 ```
 
@@ -106,26 +118,30 @@ Images are hosted on GitHub Container Registry (GHCR) and pulled automatically o
 
 ## Troubleshooting
 
-Jump to: [General](#general) · [macOS](#macos) · [Windows](#windows)
+Jump to: [General](#general) · [macOS](#macos) · [Windows](#windows) · [Linux](#linux)
 
 ### General
 
-#### `docker: 'compose' is not a docker command` or `unknown flag: --profile`
+#### `docker: unknown command: docker compose`, `docker: 'compose' is not a docker command` or `unknown flag: --profile`
 
-Both errors have the same cause: the container engine is set to `containerd`, whose `docker` command is a nerdctl shim without the Compose plugin.
+The `docker` command cannot find the Compose plugin. The wording depends on the Docker version.
 
-**Fix:** Rancher Desktop → Preferences → Container Engine → **dockerd (moby)** → Apply (takes about a minute). Open a **new terminal**, then verify:
+- **Rancher Desktop:** the container engine is set to `containerd`, whose `docker` command is a nerdctl shim without the Compose plugin. **Fix:** Preferences → Container Engine → **dockerd (moby)** → Apply (takes about a minute).
+- **Linux:** the Compose package is not installed. **Fix:** `sudo apt install docker-compose-v2` (with Ubuntu's `docker.io`) or `sudo apt install docker-compose-plugin` (with Docker's repository).
+
+Open a **new terminal**, then verify:
 
 ```shell
 docker compose version
 ```
 
-#### `Cannot connect to the Docker daemon`
+#### `failed to connect to the docker API` or `Cannot connect to the Docker daemon`
 
-The container runtime is not reachable.
+The container runtime is not reachable. The wording depends on the Docker version.
 
 - Check that Docker Desktop or Rancher Desktop is actually running (system tray on Windows, menu bar on Mac). If you just started it, give it about a minute.
 - Mac + Rancher Desktop: `DOCKER_HOST` must be set (see [Prerequisites](#prerequisites)). `echo $DOCKER_HOST` should print `unix:///Users/<you>/.rd/docker.sock`.
+- Linux: start the service with `sudo systemctl start docker`. If the message says `permission denied` instead, see [Linux](#linux).
 
 #### `Conflict. The container name "/simulator" is already in use`
 
@@ -154,7 +170,7 @@ All three services declare `logging: driver: none` in `docker-compose.yml`, so C
 Simulator logs are written inside the container. Copy them out:
 
 ```shell
-# Mac
+# Mac / Linux
 mkdir -p ~/logs && docker cp simulator:/home/dra/etc/logs/dart-suite ~/logs
 ```
 
@@ -169,11 +185,11 @@ This works whether the container is running or stopped, as long as it has starte
 
 Compose reads `.env` from the directory the command runs in. Started from anywhere else, it silently falls back to the built-in defaults and creates `data/` next to wherever you ran it.
 
-**Fix:** always run `docker compose` from the folder that contains `.env`. Confirm with `ls -a` (Mac) or `dir` (Windows) — `.env` must be listed.
+**Fix:** always run `docker compose` from the folder that contains `.env`. Confirm with `ls -a` (Mac/Linux) or `dir` (Windows) — `.env` must be listed.
 
 #### `Memory swappiness discarded` warning
 
-`docker-compose.yml` sets `mem_swappiness`, which the Rancher Desktop / WSL2 kernel ignores. This is a notice, not an error. No action needed.
+`docker-compose.yml` sets `mem_swappiness`, which Docker cannot apply when the kernel uses cgroup v2. That is the case in the Rancher Desktop VM and on current Linux distributions (Ubuntu 21.10+, Debian 11+, Fedora 31+), and WSL2 shows the same notice. This is a notice, not an error. No action needed.
 
 ### macOS
 
@@ -357,6 +373,68 @@ docker compose --profile build up -d
 
 > **Tip:** If a Windows service (e.g., `svchost / iphlpsvc`) is holding the port, try restarting Docker or rebooting the machine to release the reservation.
 
+### Linux
+
+Reported working on Ubuntu 24.04 with the [Quick Start](#quick-start) as is. Docker Engine runs containers directly on the host instead of inside a VM (as Docker Desktop and Rancher Desktop do), so a few things behave differently.
+
+#### `permission denied while trying to connect to the docker API`
+
+Older Docker versions print `permission denied while trying to connect to the Docker daemon socket`. Your user is not in the `docker` group.
+
+**Fix:** add it, then log out and back in:
+
+```shell
+sudo usermod -aG docker $USER
+```
+
+The `docker` group grants root-level privileges on the machine. If you do not want that, run the `docker` commands with `sudo` instead.
+
+#### `Permission denied` when deleting `data/`
+
+If `data/` does not exist yet, the Docker daemon creates it as `root`, and the simulator also writes its files as `root`, so your user cannot delete them (rootful Docker, the default):
+
+```shell
+sudo rm -rf data
+```
+
+To reset a single robot model only, delete its folder instead, e.g. `sudo rm -rf data/sdk7/M1013`.
+
+#### `range of CPUs is from 0.01 to N.00, as there are only N CPUs available`
+
+Same cause as the macOS entry above: the machine or VM has fewer cores than `SIMULATOR_CPU=4`. Lower `SIMULATOR_CPU` in `.env` to at most the output of `nproc`.
+
+#### Other machines can reach the ports even with `ufw` enabled
+
+Docker publishes ports on all network interfaces, and traffic to them bypasses `ufw` ([Docker docs](https://docs.docker.com/engine/network/packet-filtering-firewalls/#docker-and-ufw)). This is also what lets DART-Platform on another PC connect. To accept local connections only, prefix the mapping in `docker-compose.yml` with `127.0.0.1:`, for example `"127.0.0.1:12345:12345"`.
+
+#### Rootless Docker: `cannot expose privileged port 502`
+
+Rootless mode cannot publish ports below 1024, and the simulator publishes 502. Allow it once ([Docker docs](https://docs.docker.com/engine/security/rootless/tips/#exposing-privileged-ports)):
+
+```shell
+echo 'net.ipv4.ip_unprivileged_port_start=502' | sudo tee /etc/sysctl.d/99-unprivileged-port.conf
+sudo sysctl --system
+```
+
+#### Rootless Docker: `NanoCPUs can not be set`
+
+The `cpus` limit in `docker-compose.yml` needs the `cpu` cgroup controller, which systemd delegates to regular users by default only from version 252 (Ubuntu 22.04 ships 249). Add the delegation as described in the [Docker docs](https://docs.docker.com/engine/security/rootless/tips/#limiting-resources), then reload systemd and restart Docker:
+
+```shell
+sudo systemctl daemon-reload
+systemctl --user restart docker
+```
+
+Rootless mode is otherwise untested with this setup.
+
+#### Docker installed with snap
+
+The snap can only access files under your home directory, and not inside hidden folders. Clone this repository there, e.g. `~/dart-services-compose` (not under `/opt` or a hidden folder such as `~/.local`). Elsewhere, bind mounts such as `data/` can silently point to the wrong place ([docker-snap#189](https://github.com/canonical/docker-snap/issues/189)).
+
+#### ARM64 machines
+
+The `simulator` and `build-module-fw` images contain amd64 binaries. On ARM64 Linux they run only if amd64 emulation (QEMU via binfmt_misc) is registered on the host. This guide does not cover that setup.
+
 ## License
 
 Copyright © Doosan Robotics. All rights reserved.
@@ -372,13 +450,14 @@ Modification, redistribution, or commercial use of any part of this repository i
 
 Dart 로봇 시뮬레이터와 빌드 서비스를 실행하기 위한 Docker Compose 구성입니다.
 
-`docker compose`를 지원하는 환경이라면 어디서든 사용할 수 있습니다 (예: Docker Desktop, Rancher Desktop, OrbStack, Podman Desktop).
+`docker compose`를 지원하는 환경이라면 어디서든 사용할 수 있습니다 (예: Docker Desktop, Rancher Desktop, OrbStack, Podman Desktop, Linux의 Docker Engine).
 
 ## 사전 준비
 
 **Git**
 - Windows: `winget install Git.Git` (또는 [git-scm.com](https://git-scm.com/)에서 직접 다운로드)
 - Mac: `brew install git`
+- Linux (Ubuntu): `sudo apt install git`
 
 > Git은 필수가 아닙니다. GitHub에서 저장소를 ZIP으로 내려받아(**Code ▸ Download ZIP**) 빠른 시작의 1번 단계를 건너뛰어도 됩니다.
 
@@ -404,6 +483,17 @@ Dart 로봇 시뮬레이터와 빌드 서비스를 실행하기 위한 Docker Co
 
 > **Mac + Rancher Desktop:** 기본 VM 사양은 2 CPU / 4 GB로, `.env.example`의 기본값인 `SIMULATOR_CPU=4`보다 작습니다. 처음 실행하기 전에 Preferences (⌘,) → Virtual Machine → Hardware에서 **CPU 4개 이상 / 메모리 6 GB 이상**으로 올리세요. 그렇지 않으면 시뮬레이터가 시작되지 않습니다. [macOS 전용](#macos-전용) 항목을 참고하세요.
 
+**Docker Engine** (Linux, 무료)
+
+- Ubuntu: `sudo apt install docker.io docker-compose-v2`
+- 다른 배포판이나 Docker 공식 패키지: [Install Docker Engine](https://docs.docker.com/engine/install/)
+
+> **Linux:** Compose는 별도 패키지입니다 (Ubuntu는 `docker-compose-v2`, Docker 공식 저장소는 `docker-compose-plugin`). 설치하지 않으면 `docker compose`가 실패합니다.
+> `sudo` 없이 `docker`를 실행하려면 사용자를 `docker` 그룹에 추가한 뒤 로그아웃했다가 다시 로그인하세요. 이 그룹은 해당 PC의 root 수준 권한을 줍니다.
+> ```shell
+> sudo usermod -aG docker $USER
+> ```
+
 ## 빠른 시작
 
 ```shell
@@ -415,7 +505,7 @@ cd dart-services-compose
 cp .env.example .env
 
 # 3. 시뮬레이터 + 빌드 모듈 시작
-# 참고: Docker Desktop 또는 Rancher Desktop 이 먼저 실행 중이어야 합니다
+# 참고: Docker Desktop 또는 Rancher Desktop이 먼저 실행 중이어야 합니다 (Linux는 Docker 서비스)
 docker compose --profile build up -d
 ```
 
@@ -474,26 +564,30 @@ docker compose --profile build up -d
 
 ## 문제 해결
 
-바로가기: [공통](#공통) · [macOS 전용](#macos-전용) · [Windows 전용](#windows-전용)
+바로가기: [공통](#공통) · [macOS 전용](#macos-전용) · [Windows 전용](#windows-전용) · [Linux 전용](#linux-전용)
 
 ### 공통
 
-#### `docker: 'compose' is not a docker command` 또는 `unknown flag: --profile`
+#### `docker: unknown command: docker compose`, `docker: 'compose' is not a docker command` 또는 `unknown flag: --profile`
 
-두 오류의 원인은 같습니다. 컨테이너 엔진이 `containerd`로 설정되어 있기 때문입니다. 이 모드의 `docker`는 Compose 플러그인이 빠진 nerdctl 래퍼라 Compose 명령을 인식하지 못합니다.
+`docker` 명령이 Compose 플러그인을 찾지 못하는 상태입니다. 메시지 문구는 Docker 버전에 따라 다릅니다.
 
-**해결:** Rancher Desktop → Preferences → Container Engine → **dockerd (moby)** → Apply (약 1분 소요). **새 터미널**을 열고 확인합니다:
+- **Rancher Desktop:** 컨테이너 엔진이 `containerd`로 설정되어 있습니다. 이 모드의 `docker`는 Compose 플러그인이 빠진 nerdctl 래퍼입니다. **해결:** Preferences → Container Engine → **dockerd (moby)** → Apply (약 1분 소요).
+- **Linux:** Compose 패키지가 설치되어 있지 않습니다. **해결:** `sudo apt install docker-compose-v2` (Ubuntu의 `docker.io` 사용 시) 또는 `sudo apt install docker-compose-plugin` (Docker 공식 저장소 사용 시).
+
+**새 터미널**을 열고 확인합니다:
 
 ```shell
 docker compose version
 ```
 
-#### `Cannot connect to the Docker daemon`
+#### `failed to connect to the docker API` 또는 `Cannot connect to the Docker daemon`
 
-컨테이너 런타임에 연결할 수 없는 상태입니다.
+컨테이너 런타임에 연결할 수 없는 상태입니다. 메시지 문구는 Docker 버전에 따라 다릅니다.
 
 - Docker Desktop 또는 Rancher Desktop이 실제로 실행 중인지 확인하세요 (Windows는 작업 표시줄 트레이, Mac은 메뉴 막대). 방금 실행했다면 1분 정도 기다리세요.
 - Mac + Rancher Desktop: `DOCKER_HOST`가 설정되어 있어야 합니다 ([사전 준비](#사전-준비) 참고). `echo $DOCKER_HOST` 실행 시 `unix:///Users/<사용자>/.rd/docker.sock`이 출력되어야 합니다.
+- Linux: `sudo systemctl start docker`로 서비스를 시작하세요. 메시지에 `permission denied`가 보이면 [Linux 전용](#linux-전용) 항목을 참고하세요.
 
 #### `Conflict. The container name "/simulator" is already in use`
 
@@ -522,7 +616,7 @@ docker rm -f simulator
 시뮬레이터 로그는 컨테이너 내부에 기록됩니다. 아래 명령으로 호스트에 복사할 수 있습니다:
 
 ```shell
-# Mac
+# Mac / Linux
 mkdir -p ~/logs && docker cp simulator:/home/dra/etc/logs/dart-suite ~/logs
 ```
 
@@ -537,11 +631,11 @@ mkdir C:\logs -Force; docker cp simulator:/home/dra/etc/logs/dart-suite C:\logs
 
 Compose는 명령을 실행한 디렉터리에서 `.env`를 읽습니다. 다른 위치에서 실행하면 아무 경고 없이 기본값으로 동작하고, `data/`도 그 위치에 생성됩니다.
 
-**해결:** 항상 `.env`가 있는 폴더에서 `docker compose`를 실행하세요. `ls -a` (Mac) 또는 `dir` (Windows)로 `.env`가 보이는지 확인할 수 있습니다.
+**해결:** 항상 `.env`가 있는 폴더에서 `docker compose`를 실행하세요. `ls -a` (Mac/Linux) 또는 `dir` (Windows)로 `.env`가 보이는지 확인할 수 있습니다.
 
 #### `Memory swappiness discarded` 경고
 
-`docker-compose.yml`이 `mem_swappiness`를 지정하지만 Rancher Desktop / WSL2 커널이 이 값을 무시하면서 나오는 알림입니다. 오류가 아니며 별도 조치가 필요 없습니다.
+`docker-compose.yml`이 `mem_swappiness`를 지정하지만, 커널이 cgroup v2를 쓰면 Docker가 이 값을 적용하지 못해 나오는 알림입니다. Rancher Desktop VM과 최근 Linux 배포판(Ubuntu 21.10+, Debian 11+, Fedora 31+)이 여기에 해당하며, WSL2에서도 같은 알림이 나옵니다. 오류가 아니며 별도 조치가 필요 없습니다.
 
 ### macOS 전용
 
@@ -724,6 +818,68 @@ docker compose --profile build up -d
 ```
 
 > **팁:** Windows 서비스(예: `svchost / iphlpsvc`)가 포트를 잡고 있다면 Docker를 재시작하거나 PC를 재부팅해 예약을 해제해 보세요.
+
+### Linux 전용
+
+Ubuntu 24.04에서 [빠른 시작](#빠른-시작)을 그대로 따라 해 동작했다는 보고가 있습니다. Docker Engine은 Docker Desktop / Rancher Desktop과 달리 VM 없이 호스트에서 바로 컨테이너를 실행하므로 몇 가지 동작이 다릅니다.
+
+#### `permission denied while trying to connect to the docker API`
+
+이전 버전 Docker에서는 `permission denied while trying to connect to the Docker daemon socket`으로 표시됩니다. 현재 사용자가 `docker` 그룹에 속해 있지 않은 상태입니다.
+
+**해결:** 그룹에 추가한 뒤 로그아웃했다가 다시 로그인합니다:
+
+```shell
+sudo usermod -aG docker $USER
+```
+
+`docker` 그룹은 해당 PC의 root 수준 권한을 줍니다. 이 권한을 주고 싶지 않다면 `docker` 명령을 `sudo`로 실행하세요.
+
+#### `data/`를 지울 때 `Permission denied`
+
+`data/`가 아직 없으면 Docker 데몬이 `root` 소유로 만들고 시뮬레이터도 파일을 `root`로 기록하기 때문에, 일반 사용자 권한으로는 지울 수 없습니다 (기본값인 rootful Docker 기준):
+
+```shell
+sudo rm -rf data
+```
+
+로봇 모델 하나만 초기화하려면 해당 폴더만 지우세요 (예: `sudo rm -rf data/sdk7/M1013`).
+
+#### `range of CPUs is from 0.01 to N.00, as there are only N CPUs available`
+
+위의 macOS 항목과 원인이 같습니다. PC나 VM의 코어 수가 `SIMULATOR_CPU=4`보다 적습니다. `.env`의 `SIMULATOR_CPU`를 `nproc` 출력값 이하로 낮추세요.
+
+#### `ufw`를 켜 두어도 다른 PC에서 포트에 접속됩니다
+
+Docker는 포트를 모든 네트워크 인터페이스에 공개하며, 이 포트로 들어오는 트래픽은 `ufw`를 거치지 않습니다 ([Docker 문서](https://docs.docker.com/engine/network/packet-filtering-firewalls/#docker-and-ufw)). 다른 PC의 DART-Platform이 시뮬레이터에 접속할 수 있는 것도 이 때문입니다. 이 PC에서만 접속을 허용하려면 `docker-compose.yml`의 포트 매핑 앞에 `127.0.0.1:`을 붙이세요 (예: `"127.0.0.1:12345:12345"`).
+
+#### Rootless Docker: `cannot expose privileged port 502`
+
+Rootless 모드에서는 1024 미만 포트를 공개할 수 없는데, 시뮬레이터는 502 포트를 사용합니다. 한 번만 허용해 두면 됩니다 ([Docker 문서](https://docs.docker.com/engine/security/rootless/tips/#exposing-privileged-ports)):
+
+```shell
+echo 'net.ipv4.ip_unprivileged_port_start=502' | sudo tee /etc/sysctl.d/99-unprivileged-port.conf
+sudo sysctl --system
+```
+
+#### Rootless Docker: `NanoCPUs can not be set`
+
+`docker-compose.yml`의 `cpus` 제한을 적용하려면 `cpu` cgroup 컨트롤러가 필요한데, systemd는 252 버전부터 이 컨트롤러를 일반 사용자에게 기본으로 위임합니다 (Ubuntu 22.04는 249 버전). [Docker 문서](https://docs.docker.com/engine/security/rootless/tips/#limiting-resources)대로 위임 설정을 추가한 뒤 systemd를 다시 읽고 Docker를 재시작하세요:
+
+```shell
+sudo systemctl daemon-reload
+systemctl --user restart docker
+```
+
+그 밖의 Rootless 모드 동작은 이 구성에서 검증되지 않았습니다.
+
+#### snap으로 설치한 Docker
+
+snap으로 설치한 Docker는 홈 디렉터리 안의 파일에만 접근할 수 있고, 숨김 폴더는 제외됩니다. 저장소를 `~/dart-services-compose`처럼 홈 디렉터리 아래에 클론하세요 (`/opt` 아래나 `~/.local` 같은 숨김 폴더는 안 됩니다). 다른 위치에서는 `data/` 같은 바인드 마운트가 오류 없이 엉뚱한 곳을 가리킬 수 있습니다 ([docker-snap#189](https://github.com/canonical/docker-snap/issues/189)).
+
+#### ARM64 PC
+
+`simulator`와 `build-module-fw` 이미지에는 amd64 바이너리가 들어 있습니다. ARM64 Linux에서는 호스트에 amd64 에뮬레이션(QEMU, binfmt_misc)이 등록되어 있어야 실행됩니다. 이 문서는 해당 설정을 다루지 않습니다.
 
 ## 라이선스
 
