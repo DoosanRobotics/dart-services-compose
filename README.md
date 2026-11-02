@@ -57,7 +57,7 @@ Edit `.env` to customize:
 
 | Variable | Default | Description |
 |---|---|---|
-| `SDK_VERSION` | `sdk7` | SDK version (`sdk2` ~ `sdk7`) |
+| `SDK_VERSION` | `sdk7_1` | SDK version (`sdk2` ~ `sdk7`, `sdk7_1`) |
 | `ROBOT_MODEL` | `M1013` | Robot model (see options below) |
 | `SIMULATOR_CPU` | `4` | CPU cores allocated to simulator |
 | `SIMULATOR_MEMORY` | `2g` | Memory allocated to simulator |
@@ -85,7 +85,7 @@ Simulator data is automatically created under the directory where you run `docke
 
 ```
 data/
-└── sdk7/
+└── sdk7_1/
     └── M1013/
 ```
 
@@ -425,7 +425,7 @@ docker compose --profile build up -d
 
 | 변수 | 기본값 | 설명 |
 |---|---|---|
-| `SDK_VERSION` | `sdk7` | SDK 버전 (`sdk2` ~ `sdk7`) |
+| `SDK_VERSION` | `sdk7_1` | SDK 버전 (`sdk2` ~ `sdk7`, `sdk7_1`) |
 | `ROBOT_MODEL` | `M1013` | 로봇 모델 (아래 목록 참고) |
 | `SIMULATOR_CPU` | `4` | 시뮬레이터에 할당할 CPU 코어 수 |
 | `SIMULATOR_MEMORY` | `2g` | 시뮬레이터에 할당할 메모리 |
@@ -453,7 +453,7 @@ docker compose --profile build down
 
 ```
 data/
-└── sdk7/
+└── sdk7_1/
     └── M1013/
 ```
 
