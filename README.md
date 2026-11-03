@@ -397,7 +397,7 @@ If `data/` does not exist yet, the Docker daemon creates it as `root`, and the s
 sudo rm -rf data
 ```
 
-To reset a single robot model only, delete its folder instead, e.g. `sudo rm -rf data/sdk7/M1013`.
+To reset a single robot model only, delete its folder `data/<SDK_VERSION>/<ROBOT_MODEL>` instead, e.g. `sudo rm -rf data/sdk7_1/M1013`.
 
 #### `range of CPUs is from 0.01 to N.00, as there are only N CPUs available`
 
@@ -843,7 +843,7 @@ sudo usermod -aG docker $USER
 sudo rm -rf data
 ```
 
-로봇 모델 하나만 초기화하려면 해당 폴더만 지우세요 (예: `sudo rm -rf data/sdk7/M1013`).
+로봇 모델 하나만 초기화하려면 해당 폴더 `data/<SDK_VERSION>/<ROBOT_MODEL>`만 지우세요 (예: `sudo rm -rf data/sdk7_1/M1013`).
 
 #### `range of CPUs is from 0.01 to N.00, as there are only N CPUs available`
 
