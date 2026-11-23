@@ -14,6 +14,10 @@ services:
       - ROBOT_MODEL=${ROBOT_MODEL:-M1013}
     volumes:
       - ./data/${SDK_VERSION:-sdk7_1}/${ROBOT_MODEL:-M1013}:/home/dra/etc/data
+    # Fixed MAC: the controller serial number is derived from it. Without this,
+    # Docker assigns a random MAC on every container (re)creation and the serial
+    # changes (breaks DART Store third-party modules).
+    mac_address: ${SIM_MAC_ADDRESS:-02:35:76:55:3c:90}
     cpus: ${SIMULATOR_CPU:-4}
     mem_limit: ${SIMULATOR_MEMORY:-2g}
     mem_reservation: 1g
