@@ -73,6 +73,7 @@ Edit `.env` to customize:
 | `ROBOT_MODEL` | `M1013` | Robot model (see options below) |
 | `SIMULATOR_CPU` | `4` | CPU cores allocated to simulator |
 | `SIMULATOR_MEMORY` | `2g` | Memory allocated to simulator |
+| `SIM_MAC_ADDRESS` | `02:35:76:55:3c:90` | Simulator MAC address. The controller serial number is derived from it, so it is fixed by default and survives restarts. Override only when running several simulators on one network |
 
 ### Robot Models
 
@@ -519,6 +520,7 @@ docker compose --profile build up -d
 | `ROBOT_MODEL` | `M1013` | 로봇 모델 (아래 목록 참고) |
 | `SIMULATOR_CPU` | `4` | 시뮬레이터에 할당할 CPU 코어 수 |
 | `SIMULATOR_MEMORY` | `2g` | 시뮬레이터에 할당할 메모리 |
+| `SIM_MAC_ADDRESS` | `02:35:76:55:3c:90` | 시뮬레이터 MAC 주소. 컨트롤러 시리얼 번호가 이 값에서 정해지므로 재시작해도 유지되도록 기본값을 고정했습니다. 한 네트워크에서 시뮬레이터를 여러 대 띄울 때만 변경하세요 |
 
 ### 로봇 모델
 
