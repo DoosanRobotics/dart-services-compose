@@ -109,6 +109,8 @@ docker compose --profile build pull
 docker compose --profile build up -d
 ```
 
+> **Fixed MAC address (`SIM_MAC_ADDRESS`):** If you update from a `docker-compose.yml` without `mac_address`, the controller serial number changes **once** on the first start, because the simulator MAC moves to the fixed default. Modules installed from DART Store may need to be reinstalled once. After that the serial stays the same across restarts.
+
 ## Images
 
 Images are hosted on GitHub Container Registry (GHCR) and pulled automatically on `docker compose up`.
@@ -555,6 +557,8 @@ data/
 docker compose --profile build pull
 docker compose --profile build up -d
 ```
+
+> **MAC 주소 고정 (`SIM_MAC_ADDRESS`):** `mac_address` 가 없던 `docker-compose.yml` 에서 업데이트하면, 시뮬레이터 MAC 이 고정 기본값으로 바뀌므로 처음 실행할 때 컨트롤러 시리얼 번호가 **한 번** 바뀝니다. DART Store 에서 설치한 모듈은 한 번 다시 설치해야 할 수 있습니다. 그 뒤로는 재시작해도 시리얼이 유지됩니다.
 
 ## 이미지
 
