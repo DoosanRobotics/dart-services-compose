@@ -104,7 +104,13 @@ data/
 
 ## Update
 
+Fixes can land in `docker-compose.yml` as well as in the images, so update both. If you downloaded the ZIP instead of cloning, skip `git pull`: download the ZIP again and copy its files into your existing folder, keeping your `.env` and `data/`.
+
 ```shell
+# 1. Get the latest compose files
+git pull
+
+# 2. Pull the latest images and restart
 docker compose --profile build pull
 docker compose --profile build up -d
 ```
@@ -553,7 +559,13 @@ data/
 
 ## 업데이트
 
+수정 사항은 이미지뿐 아니라 `docker-compose.yml` 에도 들어가므로 둘 다 업데이트하세요. git 대신 ZIP 으로 받았다면 `git pull` 은 건너뛰고, ZIP 을 다시 내려받아 기존 폴더에 파일을 덮어쓰세요. `.env` 와 `data/` 는 그대로 두세요.
+
 ```shell
+# 1. 최신 compose 파일 받기
+git pull
+
+# 2. 최신 이미지 받고 재시작
 docker compose --profile build pull
 docker compose --profile build up -d
 ```
