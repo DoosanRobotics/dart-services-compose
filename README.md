@@ -105,6 +105,8 @@ data/
 
 Fixes can land in `docker-compose.yml` as well as in the images, so update both. If you downloaded the ZIP instead of cloning, skip `git pull`: download the ZIP again and copy its files into your existing folder, keeping your `.env` and `data/`.
 
+If you edited `docker-compose.yml` yourself (for example the `127.0.0.1:` port prefix under Troubleshooting ▸ Linux), keep your edits: with git, run `git stash` before `git pull` and `git stash pop` after it. With the ZIP, re-apply your edits after copying the new files.
+
 ```shell
 # 1. Get the latest compose files
 git pull
@@ -556,6 +558,8 @@ data/
 ## 업데이트
 
 수정 사항은 이미지뿐 아니라 `docker-compose.yml` 에도 들어가므로 둘 다 업데이트하세요. git 대신 ZIP 으로 받았다면 `git pull` 은 건너뛰고, ZIP 을 다시 내려받아 기존 폴더에 파일을 덮어쓰세요. `.env` 와 `data/` 는 그대로 두세요.
+
+`docker-compose.yml` 을 직접 고쳤다면 (예: 문제 해결 ▸ Linux 전용의 `127.0.0.1:` 포트 설정) 고친 내용을 지키세요. git 은 `git pull` 전에 `git stash`, 후에 `git stash pop` 을 실행하세요. ZIP 은 새 파일을 덮어쓴 뒤 고친 부분을 다시 적용하세요.
 
 ```shell
 # 1. 최신 compose 파일 받기
